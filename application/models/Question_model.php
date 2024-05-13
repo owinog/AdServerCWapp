@@ -15,6 +15,7 @@ class Question_model extends CI_Model
 		$this->db->select('questions.*, users.username');
 		$this->db->from('questions');
 		$this->db->join('users', 'questions.user_id = users.id');
+		$this->db->order_by('date_asked', 'DESC');
 		$query = $this->db->get();
 
 		$result = $query->result_array();
@@ -48,6 +49,7 @@ class Question_model extends CI_Model
 	public function get_questions_by_user($user_id)
 	{
 		$this->db->where('user_id', $user_id);
+		$this->db->order_by('date_asked', 'DESC');
 		$result = $this->db->get('questions')->result_array();
 
 		if ($result === null) {
@@ -86,7 +88,3 @@ class Question_model extends CI_Model
 		return $query->num_rows();
 	}
 }
-
-
-
-

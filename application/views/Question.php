@@ -5,15 +5,17 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title><?= $title ?></title>
+	<title><?= $question['title'] ?></title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+	<?php $this->load->view('templates/Headlinks'); ?>
 </head>
 
 <body>
 	<?php $this->load->view('Header'); ?>
 
 	<div class="container mt-5">
-		<h1><?= $question['title'] ?></h1>
+		<h2><?= $question['title'] ?></h2>
 		<p><?= $question['description'] ?></p>
 		<p class="card-text text-right" style="font-size:small">asked by <span
 				class="font-weight-bold"><?= ucfirst(strtolower($question['username'])) ?></span>
@@ -27,13 +29,21 @@
 
 		<hr>
 
-		<h5>Answers</h5>
-		<div class="mb-3">
-			<form action="<?php echo site_url('question/view/' . $question['id'] . '/show_answer_form') ?>"
-				method="post">
-				<button type="submit" name="answerButton" class="btn btn-success">Add Answer</button>
-			</form>
+		<div class="row mb-3">
+			<div class="col-md-6">
+				<h5>Answers</h5>
+			</div>
+
+
+
+			<div class="col-md-6 text-right">
+				<form action="<?php echo site_url('question/view/' . $question['id'] . '/show_answer_form') ?>"
+					method="post">
+					<button type="submit" name="answerButton" class="btn btn-success">Add Answer</button>
+				</form>
+			</div>
 		</div>
+
 
 
 		<?php if ($showForm): ?>
@@ -61,11 +71,13 @@
 			<?php foreach ($question['answers'] as $answer): ?>
 				<div class="card mb-3">
 					<div class="card-body d-flex align-items-start">
-						<div class="voteButtons mr-3">
+						<div class="mr-3">
 							<a
 								href="<?php echo site_url('question/' . $question['id'] . '/answer/' . $answer['id'] . '/vote/up'); ?>">
 								<span>&#x2191;</span>
 							</a>
+
+							<div><?= $answer['vote_count'] ?></div>
 
 							<a
 								href="<?php echo site_url('question/' . $question['id'] . '/answer/' . $answer['id'] . '/vote/down'); ?>">
@@ -74,6 +86,16 @@
 						</div>
 						<div class="w-100">
 							<p class="card-text"><?= $answer['answer'] ?></p>
+							<?php if ($this->session->userdata('user_id') == $question['user_id'] && !($answer['is_correct'])): ?>
+								<form action="<?php echo site_url('answer/mark_as_correct') ?>" method="post">
+									<input type="hidden" name="answer_id" value="<?= $answer['id'] ?>">
+									<input type="hidden" name="question_id" value="<?= $question['id'] ?>">
+									<button type="submit" class="btn btn-success">Mark as Correct</button>
+								</form>
+							<?php endif; ?>
+							<?php if ($answer['is_correct']): ?>
+								<i class="fas fa-check text-success fa-2x"></i>
+							<?php endif; ?>
 							<p class="card-text text-right" style="font-size:small">answered by <span
 									class="font-weight-bold"><?= ucfirst(strtolower($answer['username'])) ?></span>
 								<?= strtolower(timespan(strtotime($answer['date_answered']), time(), 2)); ?> ago

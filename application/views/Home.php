@@ -5,27 +5,15 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>Teqa Hub - Qs for Techies</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Teqa Hub - Home of Tech</title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
-	<style>
-		.question-list {
-			height: 400px;
-			overflow-y: auto;
-		}
+	<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+	<?php $this->load->view('templates/Headlinks'); ?>
 
-		.question-card {
-			transition: transform .5s;
-		}
-
-		.question-card:hover {
-			color: grey;
-		}
-
-		.question-card:active {
-			transform: scale(0.99);
-			color: grey;
-		}
-	</style>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.1/underscore-min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.4.0/backbone-min.js"></script>
 </head>
 
 <body>
@@ -45,59 +33,144 @@
 				</form>
 			</div>
 		</div>
-		<!-- Ask Question button -->
-		<div class="mb-3">
-			<form action="<?php echo site_url('home/show_ask_form'); ?>" method="post">
-				<button type="submit" name="askButton" class="btn btn-success">Ask Question</button>
-			</form>
-		</div>
-
-		<?php if ($showForm): ?>
+		<?php if (!$showForm): ?>
+			<div 
+			>
+				<form action="<?php echo site_url('home/show_ask_form'); ?>" method="post">
+					<button type="submit" name="askButton"
+						>Ask Question</button>
+				</form>
+			</div>
+		<?php else: ?>
+			<hr class="my-4">
+			<h5 class="font-bold text-xl mb-4">Ask a Question</h5>
 			<div id="askForm">
 				<?php echo validation_errors(); ?>
 				<div class="form-group">
 					<form action="<?php echo site_url('home/ask_question'); ?>" method="post">
-						<input type="text" class="form-control col-md-4" name="title" placeholder="Question Title">
-						<input type="text" class="form-control col-md-6" name="description"
-							placeholder="Question Description">
-						<button type="submit" class="btn btn-primary">Submit</button>
+						<input type="text" 
+						name="title" placeholder="Question Title">
+						<textarea 
+						type="text" 
+						name="description"
+							placeholder="Question Description" 
+							rows="5"></textarea>
+						<button type="submit"
+							>Submit</button>
 					</form>
 				</div>
 			</div>
 		<?php endif; ?>
 
-
-		<!-- List of questions -->
-		<div class="question-list">
+		<div class="question-list mt-3">
 			<?php if (empty($questions)): ?>
-				<div class="alert alert-info" role="alert">
+				<div class="alert alert-info mt-3" role="alert">
 					No questions found.
 				</div>
 			<?php endif; ?>
 
-			<?php foreach ($questions as $question): ?>
-				<a href="<?php echo site_url('question/view/' . $question['id']); ?>" class="text-decoration-none"
-					style="color:black; ">
-					<div class="card mb-3 question-card">
-						<div class="card-body">
-							<div class="d-flex justify-content-between align-items-center">
-
-								<h5 class="card-title"><?= $question['title'] ?></h5>
-								<p class="card-text text-right" style="font-size:small">by <span
-										class="font-weight-bold"><?= ucfirst(strtolower($question['username'])) ?></span>
-									<?= strtolower(timespan(strtotime($question['date_asked']), time(), 2)); ?> ago
-								</p>
-							</div>
-
-							<p class="card-text"><?= $question['description'] ?></p>
-							<p class="card-text">Answers: <?= $this->Question_model->get_answer_count($question['id']) ?>
-							</p>
-						</div>
-					</div>
-				</a>
-			<?php endforeach; ?>
+			<div id="questions"></div>
 		</div>
+
+		<?php echo '<script>';
+		echo 'var questionsData = ' . json_encode($questions) . ';';
+		echo '</script>'; ?>
+		<script>
+
+			var Question = Backbone.Model.extend({
+				defaults: {
+					id: "",
+					title: "",
+					description: "",
+					user_id: "",
+					username: "",
+					date_asked: "",
+					is_solved: "",
+					answer_count: "",
+					time_span: ""
+				}
+			});
+
+			var question = new Question();
+
+			var QuestionView = Backbone.View.extend({
+
+				model: Question,
+
+				initialize: function () {
+					this.render();
+				},
+
+				template: _.template(`
+		<a href="<?php echo site_url('question/view/<%= id %>'); ?>" class="text-decoration-none" style="color:black; ">
+			<div class="card mb-3 question-card">
+				<div class="card-body">
+					<div class="flex justify-between items-center">
+
+						<h5 class="font-bold text-lg">
+							<%= title %>
+						</h5>
+						<p class="text-sm text-right" style="font-size:small">by <span
+								class="font-bold"><%= username %></span>
+							<%= time_span %> ago
+						</p>
+					</div>
+
+					<p class="mt-2">
+						<%= description %>
+					</p>
+					<p class="card-text">Answers: <%= answer_count %>
+					</p>
+				</div>
+			</div>
+		</a>`),
+
+				render: function () {
+					this.$el.html(this.template(this.model.attributes));
+					return this;
+				}
+			});
+
+
+			var Questions = Backbone.Collection.extend({
+				model: Question
+			});
+
+			var QuestionsView = Backbone.View.extend({
+
+				initialize: function () {
+					this.render();
+				},
+				collection: Questions,
+
+				iteratingFunction: function (question) {
+					var questionView = new QuestionView({
+						model: question
+					});
+					this.$el.append(questionView.el);
+
+				},
+
+				render: function () {
+					this.collection.forEach(this.iteratingFunction, this);
+				}
+			});
+
+			var question_collection = new Questions();
+			question_collection.reset(questionsData)
+			var questionsView = new QuestionsView({
+				collection: question_collection,
+
+			});
+			$('#questions').append(questionsView.el);
+
+		</script>
+
 	</div>
+	<!-- <?php $this->load->view('Footer'); ?> -->
+
+	<!-- Include Alpine.js for interactive components -->
+	<script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
 
 </body>
 

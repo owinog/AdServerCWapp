@@ -5,29 +5,12 @@
 
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Profile</title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
 	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-	<style>
-		.question-list {
-			height: 400px;
-			overflow-y: auto;
-		}
-
-		.question-card {
-			transition: transform .5s;
-		}
-
-		.question-card:hover {
-			color: grey;
-		}
-
-		.question-card:active {
-			transform: scale(0.99);
-			color: grey;
-		}
-	</style>
+	<?php $this->load->view('templates/Headlinks'); ?>
 </head>
 
 <body>
@@ -37,7 +20,6 @@
 			<div class="col-md-4">
 				<!-- User details -->
 				<div class="card mb-3">
-					<img src="" class="card-img-top" alt="User Avatar">
 					<div class="card-body">
 						<p class="card-text">Email: <?= $email ?></p>
 						<p class="card-text">Questions: <?= $num_questions ?></p>
@@ -45,14 +27,6 @@
 						<p class="card-text">Votes Recieved: <?= $total_votes ?></p>
 					</div>
 				</div>
-				<!-- Image upload form -->
-				<form method="post" enctype="multipart/form-data">
-					<div class="form-group">
-						<label for="avatar">Change Avatar</label>
-						<input type="file" class="form-control-file" id="avatar" name="avatar">
-					</div>
-					<button type="submit" class="btn btn-primary">Upload</button>
-				</form>
 			</div>
 
 			<div class="col-md-8">
@@ -106,9 +80,9 @@
 					</div>
 					<div class="tab-pane fade" id="answers" role="tabpanel">
 						<div class="question-list">
-							<?php if (empty($questions)): ?>
+							<?php if (empty($answers)): ?>
 								<div class="alert alert-info" role="alert">
-									No questions found.
+									No Answers found.
 								</div>
 							<?php endif; ?>
 

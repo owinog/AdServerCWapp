@@ -1,0 +1,29 @@
+body {
+	font-family: Poppins, sans-serif;
+}
+
+.nightskyblue {
+	background-color: rgb(8, 35, 55);
+}
+
+.text-cybergreen {
+	color: #39e14f;
+}
+
+.question-list {
+	height: 70vh;
+	overflow-y: auto;
+}
+
+.question-card {
+	transition: transform 0.5s;
+}
+
+.question-card:hover {
+	color: grey;
+}
+
+.question-card:active {
+	transform: scale(0.99);
+	color: grey;
+}

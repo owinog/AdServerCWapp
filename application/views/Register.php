@@ -8,6 +8,7 @@
 	<meta charset="UTF-8">
 	<title>Register</title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+	<?php $this->load->view('templates/Headlinks'); ?>
 </head>
 
 <body>
@@ -15,9 +16,9 @@
 	<div class="container" style="padding-top:8%;">
 		<div class="row justify-content-center">
 			<div class="col-md-6">
-				<?php if ($this->session->flashdata('error')): ?>
+				<?php if (isset($error)): ?>
 					<div class="alert alert-danger">
-						<?= $this->session->flashdata('error') ?>
+						<?= $error ?>
 					</div>
 				<?php endif; ?>
 				<form action="<?= site_url('user/register') ?>" method="post">
