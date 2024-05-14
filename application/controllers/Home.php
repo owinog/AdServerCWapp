@@ -4,6 +4,8 @@ class Home extends CI_Controller
 {
 	protected $data = [];
 	protected $questions = [];
+
+	protected $updated_questions = [];
 	public function __construct()
 	{
 		parent::__construct();
@@ -14,20 +16,21 @@ class Home extends CI_Controller
 		$this->questions = $this->Question_model->get_questions();
 		$this->data['questions'] = $this->questions;
 		$this->data['showForm'] = false;
-	}
-	public function index()
-	{
-		$updated_questions = [];
 		foreach ($this->questions as $question) {
 			$answer_count = $this->Question_model->get_answer_count($question['id']);
 			$question['answer_count'] = $answer_count;
 			$question['time_span'] = strtolower(timespan(strtotime($question['date_asked']), time(), 2));
-			$updated_questions[] = $question;
+			$this->updated_questions[] = $question;
 		}
-		$this->data['questions'] = $updated_questions;
-		$this->load->view('home', $this->data);
-		log_message('debug', 'Home page loaded');
+		$this->data['questions'] = $this->updated_questions;
 	}
+	public function index()
+	{
+
+		log_message('debug', 'Home page loading');
+		$this->load->view('home', $this->data);
+	}
+
 	public function show_ask_form()
 	{
 		log_message('debug', 'show_ask_form() called');
@@ -36,6 +39,7 @@ class Home extends CI_Controller
 			redirect('login');
 		}
 		$this->data['showForm'] = true;
+		log_message('debug', 'Ask form loaded');
 		$this->load->view('home', $this->data);
 	}
 	public function ask_question()
@@ -51,6 +55,7 @@ class Home extends CI_Controller
 			$user_id = $this->session->userdata('user_id');
 			$this->Question_model->ask_question($title, $description, $user_id);
 			$this->data['showForm'] = false;
+			log_message('debug', 'Question Added');
 			redirect('home');
 		}
 	}
@@ -73,7 +78,17 @@ class Home extends CI_Controller
 			usort($filtered_questions, function ($a, $b) {
 				return strtotime($b['date_asked']) - strtotime($a['date_asked']);
 			});
-			$this->data['questions'] = $filtered_questions;
+
+			$updated_questions = [];
+			foreach ($filtered_questions as $question) {
+				$answer_count = $this->Question_model->get_answer_count($question['id']);
+				$question['answer_count'] = $answer_count;
+				$question['time_span'] = strtolower(timespan(strtotime($question['date_asked']), time(), 2));
+				$updated_questions[] = $question;
+			}
+
+			$this->data['questions'] = $updated_questions;
+			log_message('debug', 'Search results loaded');
 			$this->load->view('home', $this->data);
 		}
 	}
